@@ -268,6 +268,114 @@
     .compare-pill.up { background: rgba(74, 124, 89, 0.1); color: var(--green); }
     .compare-pill.down { background: rgba(200, 85, 61, 0.1); color: var(--terracotta); }
 
+    /* SELECTOR FECHA */
+    .fecha-selector {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 2px solid var(--sand);
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--charcoal);
+      outline: none;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    .fecha-quick-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .fecha-quick-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      background: white;
+      border: 1px solid var(--sand);
+      border-radius: 4px;
+      color: var(--charcoal);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .fecha-quick-btn.active {
+      background: var(--ocean);
+      color: var(--cream);
+      border-color: var(--ocean);
+    }
+
+    /* BOTÓN ELIMINAR */
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--terracotta);
+      color: var(--terracotta);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .day-row-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(43, 33, 24, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px;
+    }
+    .modal {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    }
+    .modal h3 {
+      font-size: 18px;
+      color: var(--charcoal);
+      margin-bottom: 12px;
+    }
+    .modal p {
+      font-size: 14px;
+      color: var(--charcoal);
+      opacity: 0.8;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border: none;
+    }
+    .btn-cancel {
+      background: var(--sand);
+      color: var(--charcoal);
+    }
+    .btn-confirm {
+      background: var(--terracotta);
+      color: white;
+    }
+
     /* HISTORIAL */
     .historial { padding: 16px; }
     .month-header {
@@ -338,7 +446,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, orderBy
+      getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, orderBy, deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
     // ============================================
@@ -403,6 +511,40 @@
         mostrarStatus("Error al guardar", true);
         return false;
       }
+    }
+
+    async function eliminarVenta(fecha) {
+      try {
+        await deleteDoc(doc(db, "ventas", fecha));
+        mostrarStatus("Cierre eliminado");
+        return true;
+      } catch (e) {
+        console.error(e);
+        mostrarStatus("Error al eliminar", true);
+        return false;
+      }
+    }
+
+    function mostrarConfirmacion(titulo, mensaje, onConfirmar) {
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.innerHTML = `
+        <div class="modal">
+          <h3>${titulo}</h3>
+          <p>${mensaje}</p>
+          <div class="modal-buttons">
+            <button class="btn-cancel" id="m-cancel">CANCELAR</button>
+            <button class="btn-confirm" id="m-confirm">SÍ, ELIMINAR</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.getElementById("m-cancel").onclick = () => overlay.remove();
+      document.getElementById("m-confirm").onclick = async () => {
+        overlay.remove();
+        await onConfirmar();
+      };
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     }
 
     function calcularStats(ventas) {
@@ -482,34 +624,76 @@
 
     function renderVendedora() {
       const hoy = new Date().toISOString().split("T")[0];
-      const ventaHoy = estado.ventas.find(v => v.fecha === hoy);
-      const fechaTexto = new Date().toLocaleDateString("es-EC", {
+      const fechaSeleccionada = estado.fechaSeleccionada || hoy;
+      const ventaSeleccionada = estado.ventas.find(v => v.fecha === fechaSeleccionada);
+
+      // Calcular fechas rápidas
+      const ayer = new Date();
+      ayer.setDate(ayer.getDate() - 1);
+      const ayerStr = ayer.toISOString().split("T")[0];
+      const anteayer = new Date();
+      anteayer.setDate(anteayer.getDate() - 2);
+      const anteayerStr = anteayer.toISOString().split("T")[0];
+
+      const fechaTexto = new Date(fechaSeleccionada + "T12:00:00").toLocaleDateString("es-EC", {
         weekday: "long", day: "numeric", month: "long", year: "numeric"
       });
+
+      const esHoy = fechaSeleccionada === hoy;
+      const esAyer = fechaSeleccionada === ayerStr;
+      const esAnteayer = fechaSeleccionada === anteayerStr;
 
       $app.innerHTML = `
         <div class="header">
           <div>
             <div class="header-pre">LAS MULATAS</div>
-            <div class="header-title">Cierre del día</div>
+            <div class="header-title">Cierre de ventas</div>
           </div>
           <button id="btn-salir" class="btn-logout">Salir</button>
         </div>
         <div class="vendedora-body">
-          <div class="today-pre">HOY</div>
+          <div class="today-pre">FECHA DEL CIERRE</div>
           <div class="today-date">${fechaTexto}</div>
-          ${ventaHoy ? `<div class="alert-info">Ya enviaste el cierre de hoy. Puedes editarlo si necesitas.</div>` : ""}
+
+          <div class="fecha-quick-buttons">
+            <button class="fecha-quick-btn ${esHoy ? "active" : ""}" data-fecha="${hoy}">HOY</button>
+            <button class="fecha-quick-btn ${esAyer ? "active" : ""}" data-fecha="${ayerStr}">AYER</button>
+            <button class="fecha-quick-btn ${esAnteayer ? "active" : ""}" data-fecha="${anteayerStr}">ANTEAYER</button>
+          </div>
+
+          <input id="fecha-input" type="date" class="fecha-selector" value="${fechaSeleccionada}" max="${hoy}" />
+
+          ${ventaSeleccionada ? `<div class="alert-info">Ya hay un cierre registrado de $${fmt(ventaSeleccionada.monto)} para esta fecha. Puedes editarlo o eliminarlo.</div>` : ""}
+
           <div class="form-card">
             <label class="label">TOTAL DE VENTAS</label>
             <div class="input-money-wrap">
-              <input id="monto" class="input-money" type="number" inputmode="decimal" placeholder="0.00" value="${ventaHoy ? ventaHoy.monto : ""}" />
+              <input id="monto" class="input-money" type="number" inputmode="decimal" placeholder="0.00" value="${ventaSeleccionada ? ventaSeleccionada.monto : ""}" />
             </div>
-            <button id="btn-enviar" class="btn-send">${ventaHoy ? "ACTUALIZAR CIERRE" : "ENVIAR CIERRE"}</button>
+            <button id="btn-enviar" class="btn-send">${ventaSeleccionada ? "ACTUALIZAR CIERRE" : "ENVIAR CIERRE"}</button>
+            ${ventaSeleccionada ? `<button id="btn-eliminar" class="btn-send" style="background:transparent;color:var(--terracotta);border:2px solid var(--terracotta);margin-top:10px">ELIMINAR ESTE CIERRE</button>` : ""}
           </div>
-          <div class="footnote">Ingrese el total de ventas del día y presione "Enviar cierre". Los dueños verán el reporte automáticamente.</div>
+
+          <div class="footnote">Selecciona la fecha del cierre, ingresa el total de ventas y presiona "Enviar". Los dueños verán el reporte automáticamente.</div>
         </div>
       `;
-      document.getElementById("btn-salir").onclick = () => { estado.role = null; render(); };
+
+      document.getElementById("btn-salir").onclick = () => { estado.role = null; estado.fechaSeleccionada = null; render(); };
+
+      // Botones rápidos de fecha
+      document.querySelectorAll(".fecha-quick-btn").forEach(btn => {
+        btn.onclick = () => {
+          estado.fechaSeleccionada = btn.dataset.fecha;
+          render();
+        };
+      });
+
+      // Input de fecha manual
+      document.getElementById("fecha-input").onchange = (e) => {
+        estado.fechaSeleccionada = e.target.value;
+        render();
+      };
+
       const $monto = document.getElementById("monto");
       const $btn = document.getElementById("btn-enviar");
       $btn.onclick = async () => {
@@ -517,21 +701,33 @@
         if (!v || parseFloat(v) < 0) return;
         $btn.disabled = true;
         $btn.textContent = "GUARDANDO...";
-        const ok = await guardarVenta(v, hoy);
+        const ok = await guardarVenta(v, fechaSeleccionada);
         if (ok) {
           $btn.textContent = "✓ ENVIADO";
           $btn.classList.add("success");
-          mostrarStatus("Cierre enviado correctamente");
-          setTimeout(() => {
-            $btn.classList.remove("success");
-            $btn.textContent = "ACTUALIZAR CIERRE";
-            $btn.disabled = false;
-          }, 2500);
+          mostrarStatus("Cierre guardado correctamente");
+          setTimeout(() => { render(); }, 1500);
         } else {
           $btn.textContent = "ENVIAR CIERRE";
           $btn.disabled = false;
         }
       };
+
+      // Botón eliminar
+      const $btnDel = document.getElementById("btn-eliminar");
+      if ($btnDel) {
+        $btnDel.onclick = () => {
+          const fechaTxt = new Date(fechaSeleccionada + "T12:00:00").toLocaleDateString("es-EC", { day: "numeric", month: "long" });
+          mostrarConfirmacion(
+            "¿Eliminar cierre?",
+            `Vas a eliminar el cierre de $${fmt(ventaSeleccionada.monto)} del ${fechaTxt}. Esta acción no se puede deshacer.`,
+            async () => {
+              await eliminarVenta(fechaSeleccionada);
+              render();
+            }
+          );
+        };
+      }
     }
 
     function renderDuenos() {
@@ -664,12 +860,34 @@
         data.ventas.forEach(v => {
           const f = new Date(v.fecha + "T12:00:00");
           const t = f.toLocaleDateString("es-EC", { weekday: "short", day: "numeric", month: "short" });
-          html += `<div class="day-row"><span class="dia">${t}</span><span class="monto">$${fmt(v.monto)}</span></div>`;
+          html += `<div class="day-row">
+            <span class="dia">${t}</span>
+            <div class="day-row-content">
+              <span class="monto">$${fmt(v.monto)}</span>
+              <button class="btn-delete" data-fecha="${v.fecha}" data-monto="${v.monto}">ELIMINAR</button>
+            </div>
+          </div>`;
         });
         html += `</div>`;
       });
       html += `</div>`;
       $c.innerHTML = html;
+
+      // Botones eliminar
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.onclick = () => {
+          const fecha = btn.dataset.fecha;
+          const monto = parseFloat(btn.dataset.monto);
+          const fechaTxt = new Date(fecha + "T12:00:00").toLocaleDateString("es-EC", { weekday: "long", day: "numeric", month: "long" });
+          mostrarConfirmacion(
+            "¿Eliminar cierre?",
+            `Vas a eliminar el cierre de $${fmt(monto)} del ${fechaTxt}. Esta acción no se puede deshacer.`,
+            async () => {
+              await eliminarVenta(fecha);
+            }
+          );
+        };
+      });
     }
 
     // Inicio

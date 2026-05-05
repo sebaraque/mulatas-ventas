@@ -1,4 +1,4 @@
-const CACHE_NAME = "mulatas-v1";
+const CACHE_NAME = "mulatas-v2";
 const ARCHIVOS = [
   "./",
   "./index.html",
