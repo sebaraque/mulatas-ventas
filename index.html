@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2B2118">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Las Mulatas">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Las Mulatas · Ventas</title>
+  <style>
+    :root {
+      --cream: #F5EBDD;
+      --terracotta: #C8553D;
+      --ocean: #1E4D5C;
+      --gold: #D4A24C;
+      --charcoal: #2B2118;
+      --sand: #E8D5B7;
+      --green: #4A7C59;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--cream);
+      color: var(--charcoal);
+      overscroll-behavior: none;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    input { font-family: inherit; }
+
+    /* LOGIN */
+    .login-screen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--sand) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .brand { text-align: center; margin-bottom: 48px; }
+    .brand-pre { font-size: 14px; letter-spacing: 4px; color: var(--terracotta); margin-bottom: 8px; font-weight: 600; }
+    .brand-name { font-size: 48px; color: var(--charcoal); font-weight: 400; font-style: italic; letter-spacing: -1px; }
+    .brand-rule { width: 60px; height: 2px; background: var(--gold); margin: 16px auto; }
+    .brand-sub { font-size: 13px; color: var(--ocean); letter-spacing: 2px; }
+    .login-card {
+      background: white;
+      padding: 32px 28px;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(43, 33, 24, 0.12);
+      width: 100%;
+      max-width: 340px;
+    }
+    .label {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--charcoal);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .pin-input {
+      width: 100%;
+      padding: 16px;
+      font-size: 24px;
+      text-align: center;
+      letter-spacing: 12px;
+      border: 2px solid var(--sand);
+      border-radius: 4px;
+      background: var(--cream);
+      color: var(--charcoal);
+      outline: none;
+    }
+    .pin-input.error { border-color: var(--terracotta); }
+    .error-text { color: var(--terracotta); font-size: 13px; margin-top: 8px; text-align: center; }
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      margin-top: 16px;
+      background: var(--ocean);
+      color: var(--cream);
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      letter-spacing: 3px;
+      font-weight: 600;
+    }
+    .login-hint {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--charcoal);
+      opacity: 0.5;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--charcoal);
+      color: var(--cream);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-pre { font-size: 11px; letter-spacing: 2px; opacity: 0.7; }
+    .header-title { font-size: 16px; font-style: italic; margin-top: 2px; }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--cream);
+      color: var(--cream);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* VENDEDORA */
+    .vendedora-body { padding: 32px 24px; }
+    .today-pre { font-size: 13px; color: var(--ocean); letter-spacing: 2px; margin-bottom: 4px; }
+    .today-date { font-size: 20px; color: var(--charcoal); text-transform: capitalize; margin-bottom: 32px; }
+    .alert-info {
+      background: var(--sand);
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--charcoal);
+      border-left: 3px solid var(--gold);
+    }
+    .form-card {
+      background: white;
+      padding: 32px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(43, 33, 24, 0.08);
+    }
+    .input-money-wrap { position: relative; margin-bottom: 24px; }
+    .input-money-wrap::before {
+      content: "$";
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 32px;
+      color: var(--terracotta);
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .input-money {
+      width: 100%;
+      padding: 20px 16px 20px 48px;
+      font-size: 36px;
+      font-weight: 600;
+      border: 2px solid var(--sand);
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--charcoal);
+      outline: none;
+    }
+    .btn-send {
+      width: 100%;
+      padding: 20px;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      letter-spacing: 3px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .btn-send:disabled { opacity: 0.5; }
+    .btn-send.success { background: var(--green); }
+    .footnote {
+      margin-top: 32px;
+      padding: 16px;
+      background: rgba(30, 77, 92, 0.06);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--ocean);
+      line-height: 1.6;
+    }
+
+    /* DUEÑOS */
+    .tabs { display: flex; border-bottom: 1px solid var(--sand); background: white; }
+    .tab {
+      flex: 1;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--charcoal);
+      font-size: 12px;
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+    .tab.active { border-bottom-color: var(--terracotta); color: var(--terracotta); }
+
+    .dashboard { padding: 24px; padding-bottom: 32px; }
+    .card-big {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(43, 33, 24, 0.08);
+      border-left: 4px solid var(--terracotta);
+    }
+    .card-label {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--charcoal);
+      opacity: 0.7;
+      font-weight: 600;
+    }
+    .card-value-big { font-size: 44px; font-weight: 600; margin-top: 8px; color: var(--terracotta); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .card-small {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(43, 33, 24, 0.06);
+    }
+    .card-small .label-sm {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--charcoal);
+      opacity: 0.7;
+      font-weight: 600;
+    }
+    .card-small .value-sm { font-size: 22px; font-weight: 600; margin-top: 6px; }
+    .card-small .sub-sm { font-size: 11px; color: var(--charcoal); opacity: 0.5; margin-top: 2px; }
+
+    .chart-card {
+      background: white;
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(43, 33, 24, 0.06);
+    }
+    .chart-title { font-size: 12px; letter-spacing: 2px; color: var(--charcoal); font-weight: 600; margin-bottom: 20px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 140px; margin-bottom: 8px; }
+    .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .chart-bar { width: 100%; border-radius: 2px 2px 0 0; min-height: 2px; }
+    .chart-labels { display: flex; gap: 4px; }
+    .chart-label { flex: 1; font-size: 10px; color: var(--charcoal); opacity: 0.5; text-align: center; }
+
+    .compare-card {
+      margin-top: 20px;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(43, 33, 24, 0.06);
+    }
+    .compare-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+    .compare-row .lbl { font-size: 14px; }
+    .compare-row .val { font-size: 16px; font-weight: 600; }
+    .compare-pill {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .compare-pill.up { background: rgba(74, 124, 89, 0.1); color: var(--green); }
+    .compare-pill.down { background: rgba(200, 85, 61, 0.1); color: var(--terracotta); }
+
+    /* HISTORIAL */
+    .historial { padding: 16px; }
+    .month-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 8px;
+      border-bottom: 2px solid var(--terracotta);
+      margin-bottom: 8px;
+    }
+    .month-name { font-size: 13px; letter-spacing: 2px; color: var(--charcoal); font-weight: 600; text-transform: uppercase; }
+    .month-total { font-size: 16px; font-weight: 600; color: var(--terracotta); }
+    .day-row {
+      background: white;
+      padding: 14px 16px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(43, 33, 24, 0.04);
+    }
+    .day-row .dia { font-size: 14px; text-transform: capitalize; }
+    .day-row .monto { font-size: 16px; font-weight: 600; color: var(--ocean); }
+
+    .empty {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--charcoal);
+      opacity: 0.6;
+    }
+
+    .loading {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ocean);
+      font-size: 18px;
+    }
+
+    .hidden { display: none !important; }
+
+    .status-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--charcoal);
+      color: var(--cream);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .status-bar.visible { opacity: 1; }
+    .status-bar.error { background: var(--terracotta); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="status-bar" class="status-bar"></div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import {
+      getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    // ============================================
+    // PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9etRUPybvJzaDlf4PFGQwlpEw1UzBJv4",
+      authDomain: "mulatas-ventas.firebaseapp.com",
+      projectId: "mulatas-ventas",
+      storageBucket: "mulatas-ventas.firebasestorage.app",
+      messagingSenderId: "143992177826",
+      appId: "1:143992177826:web:73024cb314f0f40c6643fb"
+    };
+    // ============================================
+
+    const PIN_VENDEDORA = "1234";
+    const PIN_DUENOS = "5678";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let estado = {
+      role: null,
+      ventas: [],
+      vista: "resumen"
+    };
+
+    const $app = document.getElementById("app");
+    const $status = document.getElementById("status-bar");
+
+    function mostrarStatus(msg, esError = false) {
+      $status.textContent = msg;
+      $status.className = "status-bar visible" + (esError ? " error" : "");
+      setTimeout(() => $status.classList.remove("visible"), 2500);
+    }
+
+    function fmt(n) {
+      return Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function escucharVentas() {
+      const q = query(collection(db, "ventas"), orderBy("fecha", "asc"));
+      onSnapshot(q, (snap) => {
+        estado.ventas = snap.docs.map(d => d.data());
+        render();
+      }, (err) => {
+        console.error(err);
+        mostrarStatus("Error de conexión", true);
+      });
+    }
+
+    async function guardarVenta(monto, fecha) {
+      try {
+        await setDoc(doc(db, "ventas", fecha), {
+          fecha,
+          monto: parseFloat(monto),
+          timestamp: new Date().toISOString()
+        });
+        return true;
+      } catch (e) {
+        console.error(e);
+        mostrarStatus("Error al guardar", true);
+        return false;
+      }
+    }
+
+    function calcularStats(ventas) {
+      const hoy = new Date().toISOString().split("T")[0];
+      const ahora = new Date();
+      const inicioSemana = new Date(ahora);
+      const dia = inicioSemana.getDay();
+      const diff = inicioSemana.getDate() - dia + (dia === 0 ? -6 : 1);
+      inicioSemana.setDate(diff);
+      inicioSemana.setHours(0, 0, 0, 0);
+      const inicioSemanaPasada = new Date(inicioSemana);
+      inicioSemanaPasada.setDate(inicioSemanaPasada.getDate() - 7);
+      const finSemanaPasada = new Date(inicioSemana);
+      finSemanaPasada.setDate(finSemanaPasada.getDate() - 1);
+      finSemanaPasada.setHours(23, 59, 59, 999);
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+      let s = { hoy: 0, semana: 0, semanaPasada: 0, mes: 0, total: 0, mejorDia: { monto: 0, fecha: "—" } };
+
+      ventas.forEach(v => {
+        const f = new Date(v.fecha + "T12:00:00");
+        if (v.fecha === hoy) s.hoy = v.monto;
+        if (f >= inicioSemana) s.semana += v.monto;
+        if (f >= inicioSemanaPasada && f <= finSemanaPasada) s.semanaPasada += v.monto;
+        if (f >= inicioMes) s.mes += v.monto;
+        s.total += v.monto;
+        if (v.monto > s.mejorDia.monto) {
+          s.mejorDia = { monto: v.monto, fecha: f.toLocaleDateString("es-EC", { day: "numeric", month: "short" }) };
+        }
+      });
+      s.promedio = ventas.length > 0 ? s.total / ventas.length : 0;
+      s.diasRegistrados = ventas.length;
+      return s;
+    }
+
+    function render() {
+      if (!estado.role) return renderLogin();
+      if (estado.role === "vendedora") return renderVendedora();
+      return renderDuenos();
+    }
+
+    function renderLogin() {
+      $app.innerHTML = `
+        <div class="login-screen">
+          <div class="brand">
+            <div class="brand-pre">RESTAURANTE</div>
+            <div class="brand-name">Las Mulatas</div>
+            <div class="brand-rule"></div>
+            <div class="brand-sub">CIERRE DE VENTAS</div>
+          </div>
+          <div class="login-card">
+            <label class="label">INGRESE SU PIN</label>
+            <input id="pin" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" />
+            <div id="pin-error" class="error-text hidden"></div>
+            <button id="btn-login" class="btn-primary">INGRESAR</button>
+          </div>
+          <div class="login-hint">Vendedora: 1234 · Dueños: 5678</div>
+        </div>
+      `;
+      const $pin = document.getElementById("pin");
+      const $err = document.getElementById("pin-error");
+      const submit = () => {
+        const v = $pin.value;
+        if (v === PIN_VENDEDORA) { estado.role = "vendedora"; render(); }
+        else if (v === PIN_DUENOS) { estado.role = "duenos"; render(); }
+        else {
+          $pin.classList.add("error");
+          $err.textContent = "PIN incorrecto";
+          $err.classList.remove("hidden");
+          setTimeout(() => { $pin.classList.remove("error"); $err.classList.add("hidden"); }, 2000);
+        }
+      };
+      document.getElementById("btn-login").onclick = submit;
+      $pin.onkeydown = (e) => { if (e.key === "Enter") submit(); };
+      $pin.focus();
+    }
+
+    function renderVendedora() {
+      const hoy = new Date().toISOString().split("T")[0];
+      const ventaHoy = estado.ventas.find(v => v.fecha === hoy);
+      const fechaTexto = new Date().toLocaleDateString("es-EC", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+      });
+
+      $app.innerHTML = `
+        <div class="header">
+          <div>
+            <div class="header-pre">LAS MULATAS</div>
+            <div class="header-title">Cierre del día</div>
+          </div>
+          <button id="btn-salir" class="btn-logout">Salir</button>
+        </div>
+        <div class="vendedora-body">
+          <div class="today-pre">HOY</div>
+          <div class="today-date">${fechaTexto}</div>
+          ${ventaHoy ? `<div class="alert-info">Ya enviaste el cierre de hoy. Puedes editarlo si necesitas.</div>` : ""}
+          <div class="form-card">
+            <label class="label">TOTAL DE VENTAS</label>
+            <div class="input-money-wrap">
+              <input id="monto" class="input-money" type="number" inputmode="decimal" placeholder="0.00" value="${ventaHoy ? ventaHoy.monto : ""}" />
+            </div>
+            <button id="btn-enviar" class="btn-send">${ventaHoy ? "ACTUALIZAR CIERRE" : "ENVIAR CIERRE"}</button>
+          </div>
+          <div class="footnote">Ingrese el total de ventas del día y presione "Enviar cierre". Los dueños verán el reporte automáticamente.</div>
+        </div>
+      `;
+      document.getElementById("btn-salir").onclick = () => { estado.role = null; render(); };
+      const $monto = document.getElementById("monto");
+      const $btn = document.getElementById("btn-enviar");
+      $btn.onclick = async () => {
+        const v = $monto.value;
+        if (!v || parseFloat(v) < 0) return;
+        $btn.disabled = true;
+        $btn.textContent = "GUARDANDO...";
+        const ok = await guardarVenta(v, hoy);
+        if (ok) {
+          $btn.textContent = "✓ ENVIADO";
+          $btn.classList.add("success");
+          mostrarStatus("Cierre enviado correctamente");
+          setTimeout(() => {
+            $btn.classList.remove("success");
+            $btn.textContent = "ACTUALIZAR CIERRE";
+            $btn.disabled = false;
+          }, 2500);
+        } else {
+          $btn.textContent = "ENVIAR CIERRE";
+          $btn.disabled = false;
+        }
+      };
+    }
+
+    function renderDuenos() {
+      $app.innerHTML = `
+        <div class="header">
+          <div>
+            <div class="header-pre">LAS MULATAS</div>
+            <div class="header-title">Panel de ventas</div>
+          </div>
+          <button id="btn-salir" class="btn-logout">Salir</button>
+        </div>
+        <div class="tabs">
+          <button class="tab ${estado.vista === "resumen" ? "active" : ""}" data-vista="resumen">RESUMEN</button>
+          <button class="tab ${estado.vista === "historial" ? "active" : ""}" data-vista="historial">HISTORIAL</button>
+        </div>
+        <div id="contenido"></div>
+      `;
+      document.getElementById("btn-salir").onclick = () => { estado.role = null; render(); };
+      document.querySelectorAll(".tab").forEach(t => {
+        t.onclick = () => { estado.vista = t.dataset.vista; render(); };
+      });
+      if (estado.vista === "resumen") renderResumen();
+      else renderHistorial();
+    }
+
+    function renderResumen() {
+      const stats = calcularStats(estado.ventas);
+      const $c = document.getElementById("contenido");
+
+      // Últimos 14 días
+      const dias = [];
+      const hoy = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(hoy);
+        d.setDate(d.getDate() - i);
+        const fechaStr = d.toISOString().split("T")[0];
+        const v = estado.ventas.find(x => x.fecha === fechaStr);
+        dias.push({ fecha: fechaStr, dia: d.getDate(), monto: v ? v.monto : 0 });
+      }
+      const maxMonto = Math.max(...dias.map(d => d.monto), 1);
+
+      const barsHtml = dias.map((d, i) => {
+        const altura = d.monto > 0 ? Math.max((d.monto / maxMonto) * 100, 4) : 2;
+        const esHoy = i === dias.length - 1;
+        const color = esHoy ? "var(--terracotta)" : (d.monto > 0 ? "var(--ocean)" : "var(--sand)");
+        return `<div class="chart-bar-wrap"><div class="chart-bar" style="height:${altura}%;background:${color}"></div></div>`;
+      }).join("");
+      const labelsHtml = dias.map(d => `<div class="chart-label">${d.dia}</div>`).join("");
+
+      let comparativaHtml = "";
+      if (stats.semanaPasada > 0) {
+        const pct = ((stats.semana - stats.semanaPasada) / stats.semanaPasada) * 100;
+        const up = stats.semana >= stats.semanaPasada;
+        comparativaHtml = `<div class="compare-pill ${up ? "up" : "down"}">
+          ${up ? "↑" : "↓"} ${Math.abs(pct).toFixed(1)}% vs semana pasada
+        </div>`;
+      }
+
+      $c.innerHTML = `
+        <div class="dashboard">
+          <div class="card-big">
+            <div class="card-label">VENTAS DE HOY</div>
+            <div class="card-value-big">$${fmt(stats.hoy)}</div>
+          </div>
+          <div class="grid-2">
+            <div class="card-small">
+              <div class="label-sm">ESTA SEMANA</div>
+              <div class="value-sm" style="color:var(--ocean)">$${fmt(stats.semana)}</div>
+            </div>
+            <div class="card-small">
+              <div class="label-sm">ESTE MES</div>
+              <div class="value-sm" style="color:var(--gold)">$${fmt(stats.mes)}</div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card-small">
+              <div class="label-sm">PROMEDIO DIARIO</div>
+              <div class="value-sm" style="color:var(--ocean)">$${fmt(stats.promedio)}</div>
+              <div class="sub-sm">${stats.diasRegistrados} días</div>
+            </div>
+            <div class="card-small">
+              <div class="label-sm">MEJOR DÍA</div>
+              <div class="value-sm" style="color:var(--gold)">$${fmt(stats.mejorDia.monto)}</div>
+              <div class="sub-sm">${stats.mejorDia.fecha}</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">ÚLTIMOS 14 DÍAS</div>
+            <div class="chart-bars">${barsHtml}</div>
+            <div class="chart-labels">${labelsHtml}</div>
+          </div>
+          <div class="compare-card">
+            <div class="chart-title">COMPARATIVA SEMANAL</div>
+            <div class="compare-row">
+              <span class="lbl">Esta semana</span>
+              <span class="val" style="color:var(--terracotta)">$${fmt(stats.semana)}</span>
+            </div>
+            <div class="compare-row">
+              <span class="lbl">Semana pasada</span>
+              <span class="val" style="color:var(--ocean)">$${fmt(stats.semanaPasada)}</span>
+            </div>
+            ${comparativaHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistorial() {
+      const $c = document.getElementById("contenido");
+      const ordenadas = [...estado.ventas].sort((a, b) => b.fecha.localeCompare(a.fecha));
+      if (ordenadas.length === 0) {
+        $c.innerHTML = `<div class="empty">Aún no hay cierres registrados.</div>`;
+        return;
+      }
+      const porMes = {};
+      ordenadas.forEach(v => {
+        const f = new Date(v.fecha + "T12:00:00");
+        const k = f.toLocaleDateString("es-EC", { month: "long", year: "numeric" });
+        if (!porMes[k]) porMes[k] = { total: 0, ventas: [] };
+        porMes[k].total += v.monto;
+        porMes[k].ventas.push(v);
+      });
+      let html = `<div class="historial">`;
+      Object.entries(porMes).forEach(([mes, data]) => {
+        html += `<div style="margin-bottom:24px">
+          <div class="month-header">
+            <span class="month-name">${mes}</span>
+            <span class="month-total">$${fmt(data.total)}</span>
+          </div>`;
+        data.ventas.forEach(v => {
+          const f = new Date(v.fecha + "T12:00:00");
+          const t = f.toLocaleDateString("es-EC", { weekday: "short", day: "numeric", month: "short" });
+          html += `<div class="day-row"><span class="dia">${t}</span><span class="monto">$${fmt(v.monto)}</span></div>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+      $c.innerHTML = html;
+    }
+
+    // Inicio
+    escucharVentas();
+    render();
+
+    // Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(e => console.log("SW error:", e));
+      });
+    }
+  </script>
+</body>
+</html>
